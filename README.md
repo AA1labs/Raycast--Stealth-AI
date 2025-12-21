@@ -9,7 +9,7 @@ In-line AI formatting using Raycast AI.
 3. **Pasted Result**: The AI processes the text and pastes the result directly over your selection.
 
 ## Demo:
-https://github.com/user-attachments/assets/a86b52af-76dd-4330-a98a-b19f71217aec
+https://github.com/user-attachments/assets/3072d252-adf8-4272-906c-02434c9817d6
 
 ## ⚙️ Configuration & Customization
 
