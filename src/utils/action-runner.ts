@@ -250,8 +250,9 @@ async function runStealthActionInternal(
 
     try {
       // Use clipboard + Cmd+V paste - this is modifier-safe because we explicitly specify the modifier
-      // First, copy result to clipboard
-      execSync(`cat "${tempFile}" | pbcopy`);
+      // First, copy result to clipboard (escape path for shell safety)
+      const escapedPath = tempFile.replace(/'/g, "'\\''");
+      execSync(`cat '${escapedPath}' | pbcopy`);
 
       // Paste using key code 9 (V) with explicit command modifier
       // This won't combine with other held modifiers because we're using key code
