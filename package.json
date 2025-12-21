@@ -11,11 +11,26 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "edit-action",
+      "title": "Edit Action Prompt",
+      "subtitle": "Stealth AI",
+      "description": "Hidden utility to edit prompts",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "actionId",
+          "placeholder": "action-1",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "action-1",
       "title": "Stealth Action 1",
       "subtitle": "Stealth AI",
       "description": "Fix typos and grammar",
-      "mode": "view",
+      "mode": "no-view",
       "keywords": [
         "grammar",
         "typo",
@@ -35,7 +50,7 @@
         {
           "name": "prompt",
           "title": "AI Prompt",
-          "description": "Default prompt",
+          "description": "Default prompt (single-line). Edit in the action view for multiline.",
           "type": "textfield",
           "default": "Fix all typos, spelling errors, and grammar issues in the following text. Return only the corrected text without any explanation:",
           "required": false
@@ -47,7 +62,7 @@
       "title": "Stealth Action 2",
       "subtitle": "Stealth AI",
       "description": "Make text more concise",
-      "mode": "view",
+      "mode": "no-view",
       "keywords": [
         "concise",
         "shorter",
@@ -67,7 +82,7 @@
         {
           "name": "prompt",
           "title": "AI Prompt",
-          "description": "Default prompt",
+          "description": "Default prompt (single-line). Edit in the action view for multiline.",
           "type": "textfield",
           "default": "Make the following text more concise while preserving the key meaning. Return only the rewritten text without explanation:",
           "required": false
@@ -79,7 +94,7 @@
       "title": "Stealth Action 3",
       "subtitle": "Stealth AI",
       "description": "Convert text to bullet list",
-      "mode": "view",
+      "mode": "no-view",
       "keywords": [
         "list",
         "bullets",
@@ -99,7 +114,7 @@
         {
           "name": "prompt",
           "title": "AI Prompt",
-          "description": "Default prompt",
+          "description": "Default prompt (single-line). Edit in the action view for multiline.",
           "type": "textfield",
           "default": "Convert the following text into a clean bullet point list. Return only the list without explanation:",
           "required": false
@@ -111,7 +126,7 @@
       "title": "Stealth Action 4",
       "subtitle": "Stealth AI",
       "description": "Make text more professional",
-      "mode": "view",
+      "mode": "no-view",
       "keywords": [
         "professional",
         "formal",
@@ -131,7 +146,7 @@
         {
           "name": "prompt",
           "title": "AI Prompt",
-          "description": "Default prompt",
+          "description": "Default prompt (single-line). Edit in the action view for multiline.",
           "type": "textfield",
           "default": "Rewrite the following text to be more professional and polished, suitable for business communication. Return only the rewritten text without explanation:",
           "required": false
@@ -143,7 +158,7 @@
       "title": "Stealth Action 5",
       "subtitle": "Stealth AI",
       "description": "Simplify complex text",
-      "mode": "view",
+      "mode": "no-view",
       "keywords": [
         "simplify",
         "simple",
@@ -163,7 +178,7 @@
         {
           "name": "prompt",
           "title": "AI Prompt",
-          "description": "Default prompt",
+          "description": "Default prompt (single-line). Edit in the action view for multiline.",
           "type": "textfield",
           "default": "Simplify the following text to make it easier to understand. Use simpler words and shorter sentences. Return only the simplified text without explanation:",
           "required": false
@@ -175,7 +190,7 @@
       "title": "Stealth Action 6",
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 6",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "icon.png",
       "preferences": [
         {
@@ -189,7 +204,7 @@
         {
           "name": "prompt",
           "title": "AI Prompt",
-          "description": "The prompt.",
+          "description": "The prompt. Edit in the action view for multiline.",
           "type": "textfield",
           "default": "",
           "required": false
@@ -201,7 +216,7 @@
       "title": "Stealth Action 7",
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 7",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "icon.png",
       "preferences": [
         {
@@ -215,7 +230,7 @@
         {
           "name": "prompt",
           "title": "AI Prompt",
-          "description": "The prompt.",
+          "description": "The prompt. Edit in the action view for multiline.",
           "type": "textfield",
           "default": "",
           "required": false
@@ -227,7 +242,7 @@
       "title": "Stealth Action 8",
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 8",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "icon.png",
       "preferences": [
         {
@@ -241,7 +256,7 @@
         {
           "name": "prompt",
           "title": "AI Prompt",
-          "description": "The prompt.",
+          "description": "The prompt. Edit in the action view for multiline.",
           "type": "textfield",
           "default": "",
           "required": false
@@ -253,7 +268,7 @@
       "title": "Stealth Action 9",
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 9",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "icon.png",
       "preferences": [
         {
@@ -267,7 +282,7 @@
         {
           "name": "prompt",
           "title": "AI Prompt",
-          "description": "The prompt.",
+          "description": "The prompt. Edit in the action view for multiline.",
           "type": "textfield",
           "default": "",
           "required": false
