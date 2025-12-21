@@ -65,7 +65,9 @@ export async function runStealthAction(
 
   // Debounce: don't run if last run was less than 3 seconds ago
   if (now - lastRunTime < 3000) {
-    console.log(`[DEBOUNCE] Last run was ${now - lastRunTime}ms ago. Aborting.`);
+    console.log(
+      `[DEBOUNCE] Last run was ${now - lastRunTime}ms ago. Aborting.`,
+    );
     return;
   }
 
@@ -113,8 +115,10 @@ async function runStealthActionInternal(
   let frontApp = "";
   try {
     frontApp = execSync(
-      `osascript -e 'tell application "System Events" to get name of first process whose frontmost is true'`
-    ).toString().trim();
+      `osascript -e 'tell application "System Events" to get name of first process whose frontmost is true'`,
+    )
+      .toString()
+      .trim();
     console.log(`[DEBUG] Frontmost app: ${frontApp}`);
   } catch (e) {
     console.log("[DEBUG] Could not get frontmost app");
@@ -134,21 +138,25 @@ async function runStealthActionInternal(
       // First, try to copy current selection using Cmd+C
       console.log("[DEBUG] Sending Cmd+C to copy selection...");
       execSync(
-        `osascript -e 'tell application "System Events" to keystroke "c" using command down'`
+        `osascript -e 'tell application "System Events" to keystroke "c" using command down'`,
       );
-      
+
       // Wait for clipboard to update
       await new Promise((resolve) => setTimeout(resolve, 200));
-      
+
       // Check what's in clipboard now
       let clipboardAfter = "";
       try {
         clipboardAfter = execSync("pbpaste").toString();
-        console.log(`[DEBUG] Clipboard after Cmd+C: "${clipboardAfter.substring(0, 50)}" (${clipboardAfter.length} chars)`);
-        
+        console.log(
+          `[DEBUG] Clipboard after Cmd+C: "${clipboardAfter.substring(0, 50)}" (${clipboardAfter.length} chars)`,
+        );
+
         if (clipboardAfter === marker) {
-          console.log("[DEBUG] Clipboard still has marker - NO SELECTION, auto-selecting line...");
-          
+          console.log(
+            "[DEBUG] Clipboard still has marker - NO SELECTION, auto-selecting line...",
+          );
+
           // Auto-select current line: Cmd+Right (end) then Cmd+Shift+Left (select to start)
           execSync(
             `osascript -e 'tell application "System Events"
@@ -157,16 +165,18 @@ async function runStealthActionInternal(
               key code 123 using {command down, shift down}
               delay 0.05
               keystroke "c" using command down
-            end tell'`
+            end tell'`,
           );
-          
+
           // Wait for clipboard
           await new Promise((resolve) => setTimeout(resolve, 200));
-          
+
           // Check clipboard again
           clipboardAfter = execSync("pbpaste").toString();
-          console.log(`[DEBUG] Clipboard after auto-select: "${clipboardAfter.substring(0, 50)}" (${clipboardAfter.length} chars)`);
-          
+          console.log(
+            `[DEBUG] Clipboard after auto-select: "${clipboardAfter.substring(0, 50)}" (${clipboardAfter.length} chars)`,
+          );
+
           if (clipboardAfter !== marker && clipboardAfter.trim().length > 0) {
             console.log("[DEBUG] Line auto-selected successfully!");
             hasRealSelection = true;
@@ -189,7 +199,12 @@ async function runStealthActionInternal(
     hasRealSelection = false;
   }
 
-  if (forceEditor || !hasRealSelection || !selectedText || selectedText.trim().length === 0) {
+  if (
+    forceEditor ||
+    !hasRealSelection ||
+    !selectedText ||
+    selectedText.trim().length === 0
+  ) {
     const toast = await showToast({
       style: Toast.Style.Failure,
       title: "No text selected",
@@ -237,7 +252,7 @@ async function runStealthActionInternal(
       // Use clipboard + Cmd+V paste - this is modifier-safe because we explicitly specify the modifier
       // First, copy result to clipboard
       execSync(`cat "${tempFile}" | pbcopy`);
-      
+
       // Paste using key code 9 (V) with explicit command modifier
       // This won't combine with other held modifiers because we're using key code
       execSync(
