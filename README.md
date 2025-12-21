@@ -8,6 +8,9 @@ In-line AI formatting using Raycast AI.
 2. **Run Action**: Trigger a "Stealth Action" via Raycast search, hotkey, or alias.
 3. **Pasted Result**: The AI processes the text and pastes the result directly over your selection.
 
+## Demo:
+https://github.com/user-attachments/assets/a86b52af-76dd-4330-a98a-b19f71217aec
+
 ## ⚙️ Configuration & Customization
 
 ### 1. AI Model Selection
