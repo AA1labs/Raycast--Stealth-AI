@@ -111,8 +111,9 @@ async function runStealthActionInternal(
   let selectedText = "";
   let hasRealSelection = false;
 
-  // Get frontmost app
+  // Get frontmost app (both name and bundle ID for reliable re-activation)
   let frontApp = "";
+  let frontAppBundleId = "";
   try {
     frontApp = execSync(
       `osascript -e 'tell application "System Events" to get name of first process whose frontmost is true'`,
@@ -120,6 +121,18 @@ async function runStealthActionInternal(
       .toString()
       .trim();
     console.log(`[DEBUG] Frontmost app: ${frontApp}`);
+    
+    // Also get bundle ID for more reliable activation later
+    try {
+      frontAppBundleId = execSync(
+        `osascript -e 'tell application "System Events" to get bundle identifier of first process whose frontmost is true'`,
+      )
+        .toString()
+        .trim();
+      console.log(`[DEBUG] Frontmost app bundle ID: ${frontAppBundleId}`);
+    } catch (e) {
+      console.log("[DEBUG] Could not get bundle ID, will use app name");
+    }
   } catch (e) {
     console.log("[DEBUG] Could not get frontmost app");
   }
@@ -135,14 +148,15 @@ async function runStealthActionInternal(
 
   try {
     if (!forceEditor) {
-      // First, try to copy current selection using Cmd+C
+      // First, try to copy current selection using Cmd+C via key code (more reliable)
       console.log("[DEBUG] Sending Cmd+C to copy selection...");
+      // Using key code 8 (C) instead of keystroke for better reliability
       execSync(
-        `osascript -e 'tell application "System Events" to keystroke "c" using command down'`,
+        `osascript -e 'tell application "System Events" to key code 8 using command down'`,
       );
 
       // Wait for clipboard to update
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 250));
 
       // Check what's in clipboard now
       let clipboardAfter = "";
@@ -253,6 +267,35 @@ async function runStealthActionInternal(
       // First, copy result to clipboard (escape path for shell safety)
       const escapedPath = tempFile.replace(/'/g, "'\\''");
       execSync(`cat '${escapedPath}' | pbcopy`);
+
+      // Re-activate the original app before pasting to ensure focus
+      // This prevents paste going to wrong app (like Finder) if focus was lost during AI call
+      if (frontAppBundleId) {
+        try {
+          execSync(
+            `osascript -e 'tell application id "${frontAppBundleId}" to activate'`,
+            { timeout: 5000 },
+          );
+          // Small delay to ensure app is fully focused
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          console.log(`[DEBUG] Re-activated app by bundle ID: ${frontAppBundleId}`);
+        } catch (e) {
+          console.log(`[DEBUG] Could not activate by bundle ID, trying name`);
+        }
+      } else if (frontApp) {
+        try {
+          // Escape app name for AppleScript
+          const escapedAppName = frontApp.replace(/"/g, '\\"');
+          execSync(
+            `osascript -e 'tell application "${escapedAppName}" to activate'`,
+            { timeout: 5000 },
+          );
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          console.log(`[DEBUG] Re-activated app by name: ${frontApp}`);
+        } catch (e) {
+          console.log(`[DEBUG] Could not re-activate original app: ${e}`);
+        }
+      }
 
       // Paste using key code 9 (V) with explicit command modifier
       // This won't combine with other held modifiers because we're using key code
