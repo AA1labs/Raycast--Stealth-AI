@@ -10,8 +10,8 @@
   ],
   "license": "MIT",
   "platforms": [
-    "macos",
-    "windows"
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {
