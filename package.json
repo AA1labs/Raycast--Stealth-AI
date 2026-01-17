@@ -9,6 +9,10 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macos",
+    "windows"
+  ],
   "commands": [
     {
       "name": "edit-action",

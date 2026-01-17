@@ -1,11 +1,22 @@
-# Changelog
+# Stealth AI Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [Windows Support & Finder Focus Fix] - {PR_MERGE_DATE}
 
-### Added
-- Initial release of Stealth AI.
-- 9 customizable AI actions for background text formatting.
-- Integrated multiline prompt editor for per-action configuration.
-- Support for Raycast's Quick AI Model selection.
-- Floating notifications for selection errors with quick "Edit" access.
-- Automatic window hiding for seamless background workflow.
+- Add Windows platform support using Raycast's cross-platform APIs
+- Fix Finder appearing and gaining focus during paste operations
+- Fix beep sound issue when copying text
+- Replace macOS-specific clipboard commands with Raycast Clipboard API
+- Improve app re-activation logic to prevent focus loss
+- Add platform detection for macOS and Windows specific operations
+
+## [Initial Release] - 2024-12-22
+
+- Initial release with 9 customizable AI actions
+- Fix Grammar action for typos and spelling errors
+- Make Concise action to shorten text
+- Create List action to convert text to bullet points
+- Make Professional action for business communication
+- Simplify action for complex text
+- Custom actions 6-9 for user-defined prompts
+- Multiline prompt editor
+- Hotkey and alias support

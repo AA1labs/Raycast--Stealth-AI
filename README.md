@@ -1,6 +1,6 @@
 # Stealth AI
 
-In-line AI formatting using Raycast AI. 
+In-line AI formatting using Raycast AI. Works on both macOS and Windows.
 
 ## 🚀 Getting Started
 
@@ -19,11 +19,15 @@ https://github.com/user-attachments/assets/3072d252-adf8-4272-906c-02434c9817d6
 - Open Raycast settings > Extensions > Stealth AI and assign shortcuts and aliases
 - Start using in your favorite text editor
 
+## 🖥️ Platform Support
+- **macOS**: Full support with improved focus management
+- **Windows**: Full support via Raycast Windows public beta
+
 ## ⚙️ Configuration & Customization
 
 ### 1. AI Model Selection
 You can change which AI model is used for these actions globally:
-- Open **Raycast Settings** (`Command + ,`)
+- Open **Raycast Settings** (`Command + ,` on macOS, `Ctrl + ,` on Windows)
 - Navigate to the **AI** tab
 - Change the **Quick AI Model** selection.
 
@@ -46,3 +50,4 @@ If you want to tweak the prompt for an action:
 - **Stealth Action 4 (Make Professional)**: Rewrites text for business communication.
 - **Stealth Action 5 (Simplify)**: Makes complex text easier to understand.
 - **Actions 6-9**: Fully customizable slots for your own custom AI prompts.
+
