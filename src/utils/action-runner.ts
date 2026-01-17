@@ -107,7 +107,7 @@ async function runStealthActionInternal(
   console.log(`Config: ${currentConfig.title}`);
 
   const isMac = platform() === "darwin";
-  
+
   // 2. Get selected text
   let selectedText = "";
   let hasRealSelection = false;
@@ -115,7 +115,7 @@ async function runStealthActionInternal(
   // Store original app info for re-activation (macOS only)
   let frontApp = "";
   let frontAppBundleId = "";
-  
+
   if (isMac) {
     // macOS: Get the PREVIOUS frontmost app (not Raycast)
     try {
@@ -140,9 +140,9 @@ async function runStealthActionInternal(
       )
         .toString()
         .trim();
-      
+
       console.log(`[DEBUG] Previous app result: ${previousAppResult}`);
-      
+
       const match = previousAppResult.match(/^(.+?),\s*(.+)$/);
       if (match) {
         frontApp = match[1].trim();
@@ -150,9 +150,9 @@ async function runStealthActionInternal(
       } else {
         frontApp = previousAppResult;
       }
-      
+
       console.log(`[DEBUG] Target app: ${frontApp} (${frontAppBundleId})`);
-      
+
       if (!frontApp || frontApp === "Raycast" || frontApp === "") {
         const fallbackResult = execSync(
           `osascript -e '
@@ -174,7 +174,7 @@ async function runStealthActionInternal(
     } catch (e) {
       console.log(`[DEBUG] Could not get frontmost app: ${e}`);
     }
-    
+
     if (frontApp === "Raycast") {
       frontApp = "";
       frontAppBundleId = "";
@@ -184,7 +184,7 @@ async function runStealthActionInternal(
   // Use Raycast's cross-platform Clipboard API to read selected text
   // First, clear clipboard with a marker to detect if copy happens
   const marker = `__NO_SELECTION_${Date.now()}__`;
-  
+
   try {
     await Clipboard.copy(marker);
     console.log("[DEBUG] Clipboard cleared with marker");
@@ -196,7 +196,7 @@ async function runStealthActionInternal(
     if (!forceEditor) {
       // Simulate Cmd+C / Ctrl+C to copy selection
       console.log("[DEBUG] Sending copy command...");
-      
+
       if (isMac) {
         execSync(
           `osascript -e 'tell application "System Events" to key code 8 using command down'`,
@@ -325,7 +325,9 @@ async function runStealthActionInternal(
             { timeout: 5000 },
           );
           await new Promise((resolve) => setTimeout(resolve, 150));
-          console.log(`[DEBUG] Re-activated app by bundle ID: ${frontAppBundleId}`);
+          console.log(
+            `[DEBUG] Re-activated app by bundle ID: ${frontAppBundleId}`,
+          );
         } catch (e) {
           console.log(`[DEBUG] Could not activate by bundle ID: ${e}`);
           if (frontApp && frontApp !== "Finder") {
@@ -338,7 +340,9 @@ async function runStealthActionInternal(
               await new Promise((resolve) => setTimeout(resolve, 150));
               console.log(`[DEBUG] Re-activated app by name: ${frontApp}`);
             } catch (e2) {
-              console.log(`[DEBUG] Could not re-activate by name either: ${e2}`);
+              console.log(
+                `[DEBUG] Could not re-activate by name either: ${e2}`,
+              );
             }
           }
         }
@@ -356,7 +360,9 @@ async function runStealthActionInternal(
         }
       } else {
         // No valid app to re-activate - use clipboard only mode
-        console.log("[DEBUG] No valid app to re-activate, using clipboard only");
+        console.log(
+          "[DEBUG] No valid app to re-activate, using clipboard only",
+        );
         await Clipboard.copy(cleanResult);
         toast.style = Toast.Style.Success;
         toast.title = "Copied to clipboard";
