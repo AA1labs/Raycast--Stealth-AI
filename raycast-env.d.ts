@@ -7,14 +7,19 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {}
+type ExtensionPreferences = {
+  /** AI Provider - Select your AI provider */
+  "aiProvider": "raycast" | "openai" | "anthropic" | "gemini" | "openrouter",
+  /** API Key - Enter your API Key (not needed for Raycast AI) */
+  "apiKey"?: string
+}
 
 /** Preferences accessible in all the extension's commands */
 declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
-  /** Preferences accessible in the `edit-action` command */
-  export type EditAction = ExtensionPreferences & {}
+  /** Preferences accessible in the `configure-model` command */
+  export type ConfigureModel = ExtensionPreferences & {}
   /** Preferences accessible in the `action-1` command */
   export type Action1 = ExtensionPreferences & {
   /** Action Title - Name shown in notifications */
@@ -81,11 +86,8 @@ declare namespace Preferences {
 }
 
 declare namespace Arguments {
-  /** Arguments passed to the `edit-action` command */
-  export type EditAction = {
-  /** action-1 */
-  "actionId": string
-}
+  /** Arguments passed to the `configure-model` command */
+  export type ConfigureModel = {}
   /** Arguments passed to the `action-1` command */
   export type Action1 = {}
   /** Arguments passed to the `action-2` command */

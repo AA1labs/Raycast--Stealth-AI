@@ -6,24 +6,63 @@
   "icon": "icon.png",
   "author": "ahmed",
   "categories": [
-    "Productivity"
+    "AI"
   ],
+  "preferences": [
+    {
+      "name": "aiProvider",
+      "title": "AI Provider",
+      "description": "Select your AI provider",
+      "type": "dropdown",
+      "required": false,
+      "default": "raycast",
+      "data": [
+        {
+          "title": "Raycast AI (Default)",
+          "value": "raycast"
+        },
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "Anthropic",
+          "value": "anthropic"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "OpenRouter",
+          "value": "openrouter"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Enter your API Key (not needed for Raycast AI)",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "Fix grammar in: hello world"
+      }
+    ]
+  },
   "license": "MIT",
   "commands": [
     {
-      "name": "edit-action",
-      "title": "Edit Action Prompt",
+      "name": "configure-model",
+      "title": "Configure AI Model",
       "subtitle": "Stealth AI",
-      "description": "Hidden utility to edit prompts",
+      "description": "Fetch and select models for your provider",
       "mode": "view",
-      "arguments": [
-        {
-          "name": "actionId",
-          "placeholder": "action-1",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "icon": "icon.png"
     },
     {
       "name": "action-1",
@@ -31,6 +70,7 @@
       "subtitle": "Stealth AI",
       "description": "Fix typos and grammar",
       "mode": "no-view",
+      "ai": true,
       "keywords": [
         "grammar",
         "typo",
@@ -63,6 +103,7 @@
       "subtitle": "Stealth AI",
       "description": "Make text more concise",
       "mode": "no-view",
+      "ai": true,
       "keywords": [
         "concise",
         "shorter",
@@ -95,6 +136,7 @@
       "subtitle": "Stealth AI",
       "description": "Convert text to bullet list",
       "mode": "no-view",
+      "ai": true,
       "keywords": [
         "list",
         "bullets",
@@ -127,6 +169,7 @@
       "subtitle": "Stealth AI",
       "description": "Make text more professional",
       "mode": "no-view",
+      "ai": true,
       "keywords": [
         "professional",
         "formal",
@@ -159,6 +202,7 @@
       "subtitle": "Stealth AI",
       "description": "Simplify complex text",
       "mode": "no-view",
+      "ai": true,
       "keywords": [
         "simplify",
         "simple",
@@ -191,6 +235,7 @@
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 6",
       "mode": "no-view",
+      "ai": true,
       "icon": "icon.png",
       "preferences": [
         {
@@ -217,6 +262,7 @@
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 7",
       "mode": "no-view",
+      "ai": true,
       "icon": "icon.png",
       "preferences": [
         {
@@ -243,6 +289,7 @@
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 8",
       "mode": "no-view",
+      "ai": true,
       "icon": "icon.png",
       "preferences": [
         {
@@ -269,6 +316,7 @@
       "subtitle": "Stealth AI",
       "description": "Custom AI Action 9",
       "mode": "no-view",
+      "ai": true,
       "icon": "icon.png",
       "preferences": [
         {
