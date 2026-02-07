@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stealth-ai-tool",
   "title": "Stealth AI",
   "description": "In-line AI formatting. (1) Change model in Raycast Settings > AI > Quick AI Model. (2) Set custom Hotkey & Alias per action in Settings.",
@@ -295,17 +296,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^1.10.0"
+    "@raycast/api": "^1.104.2",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.10.0",
-    "@types/react": "^19.2.7",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
-    "eslint": "^8.57.1",
-    "prettier": "^3.3.3",
-    "typescript": "^5.3.3"
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

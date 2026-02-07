@@ -188,7 +188,7 @@ async function runStealthActionInternal(
   try {
     await Clipboard.copy(marker);
     console.log("[DEBUG] Clipboard cleared with marker");
-  } catch (e) {
+  } catch {
     console.log("[DEBUG] Could not clear clipboard");
   }
 
@@ -262,7 +262,7 @@ async function runStealthActionInternal(
           hasRealSelection = true;
           selectedText = clipboardAfter;
         }
-      } catch (e) {
+      } catch {
         console.log("[DEBUG] Could not read clipboard");
       }
     }
