@@ -2,11 +2,11 @@
   "name": "stealth-ai-tool",
   "title": "Stealth AI",
   "description": "In-line AI formatting. Configure your AI provider via the 'Configure AI Model' command. Set custom Hotkey & Alias per action in Settings.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "icon": "icon.png",
   "author": "ahmed",
   "categories": [
-    "AI"
+    "Productivity"
   ],
 
   "ai": {

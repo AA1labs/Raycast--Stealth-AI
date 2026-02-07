@@ -88,15 +88,16 @@ async function showModelErrorToast(errorMsg: string) {
   const toast = await showToast({
     style: Toast.Style.Failure,
     title: isModelError ? "Model Error" : "AI Call Failed",
-    message: isModelError
-      ? "Run 'Configure AI Model' to fix this"
-      : errorMsg,
+    message: isModelError ? "Run 'Configure AI Model' to fix this" : errorMsg,
   });
   if (isModelError) {
     toast.primaryAction = {
       title: "Configure AI Model",
       onAction: () => {
-        launchCommand({ name: "configure-model", type: LaunchType.UserInitiated });
+        launchCommand({
+          name: "configure-model",
+          type: LaunchType.UserInitiated,
+        });
       },
     };
   }
@@ -210,12 +211,13 @@ async function runStealthActionInternal(
 
   try {
     console.log("AI.Model Keys: " + Object.keys(AI.Model).join(", "));
-    // Use a safer way to log the mapping
     const mapping: Record<string, string> = {};
     for (const key of Object.keys(AI.Model)) {
       try {
-        mapping[key] = (AI.Model as any)[key];
-      } catch (e) { }
+        mapping[key] = (AI.Model as Record<string, string>)[key];
+      } catch (_e) {
+        // ignore
+      }
     }
     console.log("[DEBUG] AI.Model Mapping:", JSON.stringify(mapping, null, 2));
   } catch (e) {
@@ -230,7 +232,9 @@ async function runStealthActionInternal(
     if (!forceEditor) {
       console.log("[DEBUG] Using Raycast getSelectedText API...");
       selectedText = await getSelectedText();
-      console.log(`[DEBUG] Got selected text: "${selectedText.substring(0, 50)}..." (${selectedText.length} chars)`);
+      console.log(
+        `[DEBUG] Got selected text: "${selectedText.substring(0, 50)}..." (${selectedText.length} chars)`,
+      );
       hasRealSelection = selectedText.trim().length > 0;
     }
   } catch (e) {
@@ -323,10 +327,26 @@ async function runStealthActionInternal(
     if (isMac) {
       // ... existing macOS logic ...
       if (frontAppBundleId && frontAppBundleId !== "com.apple.finder") {
-        // ... (rest of macOS logic is fine to keep conceptual) ...
-        try { execSync(`osascript -e 'tell application id "${frontAppBundleId}" to activate'`, { timeout: 5000 }); await new Promise((resolve) => setTimeout(resolve, 150)); } catch (e) { }
+        try {
+          execSync(
+            `osascript -e 'tell application id "${frontAppBundleId}" to activate'`,
+            { timeout: 5000 },
+          );
+          await new Promise((resolve) => setTimeout(resolve, 150));
+        } catch (_e) {
+          // ignore activation errors
+        }
       } else if (frontApp && frontApp !== "Finder") {
-        try { const escapedAppName = frontApp.replace(/"/g, '\\"'); execSync(`osascript -e 'tell application "${escapedAppName}" to activate'`, { timeout: 5000 }); await new Promise((resolve) => setTimeout(resolve, 150)); } catch (e) { }
+        try {
+          const escapedAppName = frontApp.replace(/"/g, '\\"');
+          execSync(
+            `osascript -e 'tell application "${escapedAppName}" to activate'`,
+            { timeout: 5000 },
+          );
+          await new Promise((resolve) => setTimeout(resolve, 150));
+        } catch (_e) {
+          // ignore activation errors
+        }
       }
     }
 
