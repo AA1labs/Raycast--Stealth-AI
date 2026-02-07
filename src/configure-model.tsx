@@ -1,143 +1,187 @@
-import { Action, ActionPanel, Form, LocalStorage, showToast, Toast, useNavigation, open } from "@raycast/api";
+import { Action, ActionPanel, Form, LocalStorage, showToast, Toast, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { LLMService, Model } from "./utils/llm-service";
 
+const PROVIDERS = [
+    { value: "raycast", title: "Raycast AI (Default)" },
+    { value: "openai", title: "OpenAI" },
+    { value: "anthropic", title: "Anthropic" },
+    { value: "gemini", title: "Gemini" },
+    { value: "openrouter", title: "OpenRouter" },
+];
+
+const PROVIDER_URLS: Record<string, string> = {
+    openai: "https://platform.openai.com/docs/models",
+    anthropic: "https://docs.anthropic.com/en/docs/models-overview",
+    gemini: "https://ai.google.dev/gemini-api/docs/models/gemini",
+    openrouter: "https://openrouter.ai/models",
+    raycast: "https://raycast.com",
+};
+
+const STORAGE_KEYS = {
+    provider: "configured_provider",
+    apiKey: (p: string) => `api_key_${p}`,
+    model: (p: string) => `selected_model_${p}`,
+};
+
 export default function ConfigureModelCommand() {
+    const [ready, setReady] = useState(false);
+    const [provider, setProvider] = useState("raycast");
+    const [apiKey, setApiKey] = useState("");
     const [models, setModels] = useState<Model[]>([]);
+    const [selectedModel, setSelectedModel] = useState("");
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedModel, setSelectedModel] = useState<string>("");
-    const [customModel, setCustomModel] = useState<string>("");
-    const { pop } = useNavigation();
 
-    const provider = LLMService.config.aiProvider;
-
-    // Fetch models on load
+    // Load all saved data on mount
     useEffect(() => {
-        fetchData();
-    }, [provider]);
+        (async () => {
+            const p = await LocalStorage.getItem<string>(STORAGE_KEYS.provider) || "raycast";
+            const key = await LocalStorage.getItem<string>(STORAGE_KEYS.apiKey(p)) || "";
+            const model = await LocalStorage.getItem<string>(STORAGE_KEYS.model(p)) || "";
 
-    async function fetchData() {
-        setIsLoading(true);
-        try {
-            // 1. Get currently saved model
-            const stored = await LLMService.getSelectedModel();
+            setProvider(p);
+            setApiKey(key);
+            setSelectedModel(model);
 
-            // Check if stored value is in the fetched list later, or if it's custom. 
-            // For now, we set both. If it matches a dropdown item, dropdown selects it.
-            setSelectedModel(stored);
-            setCustomModel(stored);
-
-            // 2. Fetch fresh list from API
-            if (provider !== "raycast") {
-                const fetched = await LLMService.fetchModels();
-                setModels(fetched);
-
-                // If stored model is NOT in fetched list, it's likely a custom one
-                const isKnown = fetched.some(m => m.id === stored);
-                if (isKnown) {
-                    setCustomModel(""); // It's a standard model, clear custom field to avoid confusion
+            if (p !== "raycast" && key) {
+                try {
+                    const fetched = await LLMService.fetchModelsWithKey(p, key);
+                    setModels(fetched);
+                } catch (e) {
+                    console.error("Failed to fetch models on load", e);
                 }
             }
+
+            setIsLoading(false);
+            setReady(true);
+        })();
+    }, []);
+
+    async function onProviderChange(newProvider: string) {
+        setProvider(newProvider);
+        setModels([]);
+        setSelectedModel("");
+        setIsLoading(true);
+
+        try {
+            const key = await LocalStorage.getItem<string>(STORAGE_KEYS.apiKey(newProvider)) || "";
+            const model = await LocalStorage.getItem<string>(STORAGE_KEYS.model(newProvider)) || "";
+            setApiKey(key);
+            setSelectedModel(model);
+
+            if (newProvider !== "raycast" && key) {
+                const fetched = await LLMService.fetchModelsWithKey(newProvider, key);
+                setModels(fetched);
+            }
         } catch (e) {
-            showToast({
-                style: Toast.Style.Failure,
-                title: "Failed to fetch models",
-                message: String(e),
-            });
+            console.error("Failed to load provider data", e);
         } finally {
             setIsLoading(false);
         }
     }
 
-    async function handleSubmit(values: { modelId: string; customModelId: string }) {
-        const key = `selected_model_${provider}`;
-
-        // Priority: Custom Field > Dropdown
-        const finalModel = values.customModelId.trim() || values.modelId;
-
-        if (!finalModel) {
-            await showToast({ style: Toast.Style.Failure, title: "Error", message: "Please select or type a model" });
+    async function handleFetchModels() {
+        if (!apiKey && provider !== "raycast") {
+            await showToast({ style: Toast.Style.Failure, title: "API Key Required", message: "Enter an API key first" });
             return;
         }
+        setIsLoading(true);
+        try {
+            const fetched = await LLMService.fetchModelsWithKey(provider, apiKey);
+            setModels(fetched);
+            await showToast({ style: Toast.Style.Success, title: "Models Loaded" });
+        } catch (e) {
+            await showToast({ style: Toast.Style.Failure, title: "Failed to fetch models", message: String(e) });
+            setModels([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
-        // Save to LocalStorage
-        await LocalStorage.setItem(key, finalModel);
+    async function handleSubmit(values: { provider: string; apiKey: string; modelId: string }) {
+        const p = values.provider;
+        const key = values.apiKey?.trim() || "";
+        const finalModel = values.modelId;
+
+        await LocalStorage.setItem(STORAGE_KEYS.provider, p);
+
+        if (p !== "raycast") {
+            if (key) {
+                await LocalStorage.setItem(STORAGE_KEYS.apiKey(p), key);
+            }
+            if (!finalModel) {
+                await showToast({ style: Toast.Style.Failure, title: "No Model", message: "Please select a model" });
+                return;
+            }
+            await LocalStorage.setItem(STORAGE_KEYS.model(p), finalModel);
+        }
 
         await showToast({
             style: Toast.Style.Success,
-            title: "Model Saved",
-            message: `Using ${finalModel} for ${provider}`,
+            title: "Configuration Saved",
+            message: p === "raycast" ? "Using Raycast AI" : `${p}: ${finalModel}`,
         });
-        pop();
     }
 
-    function getProviderUrl() {
-        switch (provider) {
-            case "openai": return "https://platform.openai.com/docs/models";
-            case "anthropic": return "https://docs.anthropic.com/en/docs/models-overview";
-            case "gemini": return "https://ai.google.dev/gemini-api/docs/models/gemini";
-            case "openrouter": return "https://openrouter.ai/models";
-            default: return "https://raycast.com";
-        }
+    if (!ready) {
+        return <Form isLoading={true} />;
     }
 
-    if (provider === "raycast") {
-        return (
-            <Form>
-                <Form.Description text="You are using Raycast AI." />
-                <Form.Description text="Model selection is handled by Raycast Settings > AI." />
-            </Form>
-        );
-    }
+    const showModelFields = provider !== "raycast";
 
     return (
         <Form
             isLoading={isLoading}
             actions={
                 <ActionPanel>
-                    <Action.SubmitForm title="Save Model" onSubmit={handleSubmit} />
-                    <Action title="Reload Models" onAction={fetchData} />
-                    <Action title="Open Provider Models Page" onAction={() => open(getProviderUrl())} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+                    <Action.SubmitForm title="Save Configuration" onSubmit={handleSubmit} />
+                    {showModelFields && (
+                        <Action title="Fetch Models" onAction={handleFetchModels} shortcut={{ modifiers: ["cmd"], key: "r" }} />
+                    )}
+                    {showModelFields && (
+                        <Action title="Open Provider Docs" onAction={() => open(PROVIDER_URLS[provider] || "")} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+                    )}
                 </ActionPanel>
             }
         >
-            <Form.Description title="Provider" text={provider.toUpperCase()} />
-
-            <Form.Dropdown
-                id="modelId"
-                title="Select Model"
-                value={selectedModel}
-                onChange={(newValue) => {
-                    setSelectedModel(newValue);
-                    setCustomModel(""); // Clear custom if user picks from list
-                }}
-                storeValue={false}
-            >
-                {models.map((model) => (
-                    <Form.Dropdown.Item
-                        key={model.id}
-                        value={model.id}
-                        title={`${model.name} (${model.id})`}
-                        icon={selectedModel === model.id ? { source: "check.png" } : undefined}
-                    />
+            <Form.Dropdown id="provider" title="AI Provider" value={provider} onChange={onProviderChange}>
+                {PROVIDERS.map((p) => (
+                    <Form.Dropdown.Item key={p.value} value={p.value} title={p.title} />
                 ))}
-                {models.length === 0 && !isLoading && (
-                    <Form.Dropdown.Item value="" title="No models found (Check API Key)" />
-                )}
             </Form.Dropdown>
 
-            <Form.Separator />
+            {provider === "raycast" && (
+                <Form.Description text="Raycast AI uses the model configured in Raycast Settings > AI. No additional setup needed here." />
+            )}
 
-            <Form.TextField
-                id="customModelId"
-                title="Custom Model ID"
-                placeholder="Optional: Override selected model (e.g. gpt-4-turbo)"
-                value={customModel}
-                onChange={setCustomModel}
-                info="Enter a model ID here to use it instead of the dropdown selection."
-            />
-
-            <Form.Description text="Click 'Save Model' to apply changes." />
+            {showModelFields && (
+                <>
+                    <Form.Separator />
+                    <Form.PasswordField
+                        id="apiKey"
+                        title="API Key"
+                        placeholder="Enter your API key"
+                        value={apiKey}
+                        onChange={setApiKey}
+                        info="Your key is stored locally."
+                    />
+                    <Form.Separator />
+                    <Form.Dropdown
+                        id="modelId"
+                        title="Select Model"
+                        value={selectedModel}
+                        onChange={setSelectedModel}
+                    >
+                        {models.length === 0 && !isLoading && (
+                            <Form.Dropdown.Item value="" title="No models loaded" />
+                        )}
+                        {models.map((model) => (
+                            <Form.Dropdown.Item key={model.id} value={model.id} title={`${model.name} (${model.id})`} />
+                        ))}
+                    </Form.Dropdown>
+                    <Form.Description text="Press Cmd+R (or Ctrl+R) to refresh the models list." />
+                </>
+            )}
         </Form>
     );
 }

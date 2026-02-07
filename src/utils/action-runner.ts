@@ -12,7 +12,6 @@ import {
 } from "@raycast/api";
 
 import { execSync } from "child_process";
-import { platform } from "os";
 import { LLMService } from "./llm-service";
 
 interface ActionConfig {
@@ -84,6 +83,26 @@ export async function runStealthAction(
   }
 }
 
+async function showModelErrorToast(errorMsg: string) {
+  const isModelError = /model/i.test(errorMsg);
+  const toast = await showToast({
+    style: Toast.Style.Failure,
+    title: isModelError ? "Model Error" : "AI Call Failed",
+    message: isModelError
+      ? "Run 'Configure AI Model' to fix this"
+      : errorMsg,
+  });
+  if (isModelError) {
+    toast.primaryAction = {
+      title: "Configure AI Model",
+      onAction: () => {
+        launchCommand({ name: "configure-model", type: LaunchType.UserInitiated });
+      },
+    };
+  }
+  return toast;
+}
+
 async function runStealthActionInternal(
   actionId: string,
   forceEditor?: boolean,
@@ -109,7 +128,7 @@ async function runStealthActionInternal(
   }
   console.log(`Config: ${currentConfig.title}`);
 
-  const isMac = platform() === "darwin";
+  const isMac = process.platform === "darwin";
 
   // Store original app info for re-activation (macOS only)
   let frontApp = "";
@@ -251,13 +270,14 @@ async function runStealthActionInternal(
 
   try {
     // 5. Final AI access check
-    if (!canAccessAI && LLMService.config.aiProvider === "raycast") {
+    const currentProvider = await LLMService.getProvider();
+    if (!canAccessAI && currentProvider === "raycast") {
       throw new Error("Raycast AI is required. Please upgrade to Raycast Pro.");
     }
 
     // 6. Call AI (using new LLM Service)
     const prompt = `${currentConfig.prompt}\n\n${selectedText}`;
-    console.log(`Calling AI via ${LLMService.config.aiProvider}...`);
+    console.log(`Calling AI via ${currentProvider}...`);
 
     let result = "";
     try {
@@ -268,13 +288,15 @@ async function runStealthActionInternal(
 
       const errorMsg = (e as Error).message;
 
-      // Special handling for Raycast AI Windows limitation (User requested no clipboard fallback here)
+      // Check for model-related errors
+      if (/model/i.test(errorMsg)) {
+        await showModelErrorToast(errorMsg);
+        return;
+      }
+
+      // Special handling for Raycast AI limitation
       if (errorMsg.includes("Raycast AI is not supported")) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Setup Required",
-          message: "Raycast AI is unavailable. Please select OpenAI/Gemini in Settings.",
-        });
+        await showModelErrorToast(errorMsg);
         return;
       }
 
@@ -282,7 +304,7 @@ async function runStealthActionInternal(
       console.log("[DEBUG] AI Service failed. Using Clipboard Fallback.");
       await Clipboard.copy(prompt);
 
-      const toast = await showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "AI Call Failed",
         message: "Prompt copied! Paste in external AI tool.",
@@ -313,8 +335,13 @@ async function runStealthActionInternal(
     toast.title = "Done!";
   } catch (error) {
     console.error("Error:", error);
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed";
-    toast.message = String(error);
+    const errorMsg = String(error);
+    if (/model/i.test(errorMsg)) {
+      await showModelErrorToast(errorMsg);
+    } else {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed";
+      toast.message = errorMsg;
+    }
   }
 }

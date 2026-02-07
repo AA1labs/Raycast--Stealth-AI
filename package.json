@@ -1,52 +1,14 @@
 {
   "name": "stealth-ai-tool",
   "title": "Stealth AI",
-  "description": "In-line AI formatting. (1) Change model in Raycast Settings > AI > Quick AI Model. (2) Set custom Hotkey & Alias per action in Settings.",
+  "description": "In-line AI formatting. Configure your AI provider via the 'Configure AI Model' command. Set custom Hotkey & Alias per action in Settings.",
   "version": "1.0.0",
   "icon": "icon.png",
   "author": "ahmed",
   "categories": [
     "AI"
   ],
-  "preferences": [
-    {
-      "name": "aiProvider",
-      "title": "AI Provider",
-      "description": "Select your AI provider",
-      "type": "dropdown",
-      "required": false,
-      "default": "raycast",
-      "data": [
-        {
-          "title": "Raycast AI (Default)",
-          "value": "raycast"
-        },
-        {
-          "title": "OpenAI",
-          "value": "openai"
-        },
-        {
-          "title": "Anthropic",
-          "value": "anthropic"
-        },
-        {
-          "title": "Gemini",
-          "value": "gemini"
-        },
-        {
-          "title": "OpenRouter",
-          "value": "openrouter"
-        }
-      ]
-    },
-    {
-      "name": "apiKey",
-      "title": "API Key",
-      "description": "Enter your API Key (not needed for Raycast AI)",
-      "type": "password",
-      "required": false
-    }
-  ],
+
   "ai": {
     "evals": [
       {

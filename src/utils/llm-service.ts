@@ -2,7 +2,7 @@ import { AI, getPreferenceValues, LocalStorage } from "@raycast/api";
 import https from "https";
 
 export interface AIPreferences {
-    aiProvider: "raycast" | "openai" | "anthropic" | "gemini" | "openrouter";
+    aiProvider?: string;
     apiKey?: string;
 }
 
@@ -17,21 +17,49 @@ export class LLMService {
         return getPreferenceValues<AIPreferences>();
     }
 
-    public static async getSelectedModel(): Promise<string> {
-        const { aiProvider } = this.config;
+    public static async getProvider(): Promise<string> {
+        const saved = await LocalStorage.getItem<string>("configured_provider");
+        return saved || this.config.aiProvider || "raycast";
+    }
 
-        // Check LocalStorage for a specific model selected via "Configure AI Model" command
-        const key = `selected_model_${aiProvider}`;
+    public static async getApiKey(provider: string): Promise<string> {
+        const saved = await LocalStorage.getItem<string>(`api_key_${provider}`);
+        if (saved) return saved;
+        return this.config.apiKey || "";
+    }
+
+    public static async getSelectedModel(): Promise<string> {
+        const provider = await this.getProvider();
+
+        const key = `selected_model_${provider}`;
         const saved = await LocalStorage.getItem<string>(key);
         if (saved) return saved;
 
-        // Default fallbacks if nothing saved
-        switch (aiProvider) {
-            case "openai": return "gpt-4o-mini";
-            case "anthropic": return "claude-3-5-sonnet-20240620";
-            case "gemini": return "gemini-1.5-flash";
-            case "openrouter": return "openai/gpt-4o-mini";
-            default: return "";
+        return "";
+    }
+
+    public static async fetchModelsWithKey(provider: string, key: string): Promise<Model[]> {
+        switch (provider) {
+            case "openai":
+                const oaiK = await this.request("https://api.openai.com/v1/models", "GET", { "Authorization": `Bearer ${key}` }, null);
+                return oaiK.data.map((m: any) => ({ id: m.id, name: m.id })).sort((a: any, b: any) => a.id.localeCompare(b.id));
+
+            case "anthropic":
+                const antK = await this.request("https://api.anthropic.com/v1/models", "GET", { "x-api-key": key, "anthropic-version": "2023-06-01" }, null);
+                return antK.data.map((m: any) => ({ id: m.id, name: m.display_name || m.id })).sort((a: any, b: any) => a.id.localeCompare(b.id));
+
+            case "gemini":
+                const gemK = await this.request(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`, "GET", {}, null);
+                return gemK.models
+                    .filter((m: any) => m.name.includes("gemini"))
+                    .map((m: any) => ({ id: m.name.replace("models/", ""), name: m.displayName }));
+
+            case "openrouter":
+                const orK = await this.request("https://openrouter.ai/api/v1/models", "GET", {}, null);
+                return orK.data.map((m: any) => ({ id: m.id, name: m.name || m.id }));
+
+            default:
+                return [];
         }
     }
 
@@ -45,12 +73,8 @@ export class LLMService {
                 return oai.data.map((m: any) => ({ id: m.id, name: m.id })).sort((a: any, b: any) => a.id.localeCompare(b.id));
 
             case "anthropic":
-                // Anthropic doesn't have a simple public models endpoint yet, returning curated list
-                return [
-                    { id: "claude-3-5-sonnet-20240620", name: "Claude 3.5 Sonnet" },
-                    { id: "claude-3-opus-20240229", name: "Claude 3 Opus" },
-                    { id: "claude-3-haiku-20240307", name: "Claude 3 Haiku" }
-                ];
+                const ant = await this.request("https://api.anthropic.com/v1/models", "GET", { "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, null);
+                return ant.data.map((m: any) => ({ id: m.id, name: m.display_name || m.id })).sort((a: any, b: any) => a.id.localeCompare(b.id));
 
             case "gemini":
                 const gem = await this.request(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`, "GET", {}, null);
@@ -68,15 +92,16 @@ export class LLMService {
     }
 
     public static async askAI(prompt: string): Promise<string> {
-        const { aiProvider, apiKey } = this.config;
+        const aiProvider = await this.getProvider();
         const model = await this.getSelectedModel();
+        const apiKey = await this.getApiKey(aiProvider);
 
         if (aiProvider === "raycast") {
             return await this.callRaycastAI(prompt);
         }
 
         if (!apiKey) {
-            throw new Error(`API Key is required for ${aiProvider}`);
+            throw new Error(`API Key is required for ${aiProvider}. Configure it via "Configure AI Model" command.`);
         }
 
         switch (aiProvider) {

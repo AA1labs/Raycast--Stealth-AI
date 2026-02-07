@@ -7,12 +7,7 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {
-  /** AI Provider - Select your AI provider */
-  "aiProvider": "raycast" | "openai" | "anthropic" | "gemini" | "openrouter",
-  /** API Key - Enter your API Key (not needed for Raycast AI) */
-  "apiKey"?: string
-}
+type ExtensionPreferences = {}
 
 /** Preferences accessible in all the extension's commands */
 declare type Preferences = ExtensionPreferences
