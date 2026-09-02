@@ -15,7 +15,7 @@
 - Fix model dropdown breaking when a saved model is missing from the fetched list
 - Debounce is now per action, so one action no longer blocks a different one for 3 seconds
 
-## [In-App AI Configuration] - {PR_MERGE_DATE}
+## [In-App AI Configuration] - 2026-02-09
 
 - Add in-app AI provider and model configuration (no more Raycast Settings)
 - Support for RaycastAI (default), OpenAI, Anthropic, Gemini, and OpenRouter model fetching via API
